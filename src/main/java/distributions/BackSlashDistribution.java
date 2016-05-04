@@ -1,5 +1,6 @@
 package distributions;
 
+import distribution_estimate.Statistics;
 import distributions.interfaces.Distribution;
 
 /**

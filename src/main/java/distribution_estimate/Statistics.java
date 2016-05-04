@@ -1,14 +1,18 @@
 package distribution_estimate;
 
+import algorithms.littles.Element;
+import org.apache.commons.math3.distribution.AbstractRealDistribution;
+
 import java.awt.geom.Arc2D;
+import java.io.*;
 import java.util.*;
 
 /**
  * Created by Alexander on 18.04.2016.
  */
 public class Statistics{
-
-    private static final int SCALE = 2;
+    public static final int SCALE = 2;
+    public static final int COUNT = 5;
 
     public Statistics(){
     }
@@ -64,9 +68,10 @@ public class Statistics{
     }
 
     public static TreeMap<Float, Float> calculateEDF(ArrayList<Float> input){
+        Collections.sort(input);
         TreeMap<Float, Float> tempCDF = new TreeMap<>();
-        Float totalSum = Statistics.sum(input);
-        Float tempSum = 0F;
+        Float totalCount = (float)input.size();
+        Float tempCount = 0F;
         Float current = null;
         try{
             current = input.get(0);
@@ -75,30 +80,79 @@ public class Statistics{
         }
 
         if (current != null){
+            //tempCDF.put(round(current, SCALE), 0.0F);
             for (Float item : input){
                 if (current.equals(item))
-                    tempSum += item;
+                    tempCount ++;
                 else{
-                    tempCDF.put(current, round(tempSum/totalSum, SCALE));
-                    tempSum += item;
+                    tempCDF.put(round(current, SCALE), round(tempCount/totalCount, SCALE));
+                    tempCount ++;
                     current = item;
+                }
+            }
+            tempCDF.put(round(current, SCALE), round(tempCount/totalCount, SCALE));
+        }
+        return tempCDF;
+    }
+
+
+    public static ArrayList<Float> getUniformData(File file) throws IOException {
+        ArrayList<Float> tempList = new ArrayList<>();
+
+        try(BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)))){
+            String line;
+            while ((line = br.readLine()) != null){
+                String[] values = line.split(",");
+
+                for(int i = 0; i < values.length; i++) {
+                    tempList.add(Float.valueOf(values[i]));
                 }
             }
         }
 
-        tempCDF.put(current, tempSum/totalSum);
-
-        return tempCDF;
+        return tempList;
     }
 
-    public static void main(String args[]){
-        Statistics st = new Statistics();
-        ArrayList<Float> temp = new ArrayList<>();
-        Float[] array = {1F, 1F, 2F, 2F, 2F, 3F, 4F, 4F, 5F};
-        temp.addAll(Arrays.asList(array));
+    public static ArrayList<Float> generateNumbers(distributions.interfaces.Distribution distribution, int count){
+        ArrayList<Float> distrArray = null;
+        try {
+            distrArray = getUniformData(new File("src\\main\\java\\distribution_estimate\\resources\\uniform_distribution_numbers.txt"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        System.out.println("Sum = " + st.sum(temp));
-        System.out.println(st.normalization(temp));
-        System.out.println(st.calculateEDF(temp));
+        for(int i = 0; i < distrArray.size(); i++){
+            distrArray.set(i, round((float) distribution.inverseCumulativeProbability(distrArray.get(i)), Statistics.SCALE));
+        }
+
+        return distrArray;
+    }
+
+    public static ArrayList<Float> generateNumbers(AbstractRealDistribution distribution, int count){
+        ArrayList<Float> distrArray = null;
+        try {
+            distrArray = getUniformData(new File("src\\main\\java\\distribution_estimate\\resources\\uniform_distribution_numbers.txt"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        for(int i = 0; i < distrArray.size(); i++){
+            distrArray.set(i, round((float) distribution.inverseCumulativeProbability(distrArray.get(i)), Statistics.SCALE));
+        }
+
+        return distrArray;
+    }
+
+
+    public static Float[] doubleFloatConvert(Double[] input){
+        Float[] output = new Float[input.length];
+        for(int i = 0; i < output.length; i++) {
+            output[i] = input[i].floatValue();
+        }
+
+        return output;
+    }
+    public static void main(String args[]){
+        System.out.println(Math.pow(0.3, 1/3D));
     }
 }

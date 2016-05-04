@@ -1,6 +1,5 @@
 import distribution_estimate.Distribution;
-import distribution_estimate.Distributions;
-import javafx.scene.shape.TriangleMesh;
+import distribution_estimate.KSFitGoodness;
 import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.TriangularDistribution;
@@ -24,16 +23,12 @@ public class ApacheDistributionTest{
         Float[] array = {1F, 1F, 2F, 2F, 2F, 3F, 4F, 4F, 5F};
         temp.addAll(Arrays.asList(array));
 
-        Distribution distribution = new Distribution(temp);
+        Distribution distribution = new Distribution(temp, false);
 
         NormalDistribution normal = new NormalDistribution((double)distribution.getExpectation(),
                 Math.sqrt(distribution.getVariance()));
 
         System.out.println(normal.cumulativeProbability(2.896036));
-        System.out.println(Distributions.inverseNormalDistribution(distribution.getExpectation(),distribution.getVariance(), 0.2F ));
-        assertEquals("Normal Distribution",normal.cumulativeProbability(0.2),
-                Distributions.normalDistribution(distribution.getExpectation(),distribution.getVariance(), 0.2F ), 0.000001);
-
 
         TriangularDistribution tri = new TriangularDistribution(1, 2, 3);
         ExponentialDistribution exp = new ExponentialDistribution(1);

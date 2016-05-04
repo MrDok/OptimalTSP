@@ -13,9 +13,14 @@ public class Distribution{
     private Float variance;
 
 
-    public Distribution(ArrayList<Float> initialData){
-        this.initialData = initialData;
-        this.normalData = Statistics.normalization(this.initialData);
+    public Distribution(ArrayList<Float> initialData, boolean isNormalized){
+        this.initialData = new ArrayList<>(initialData);
+
+        if(isNormalized)
+            this.normalData = new ArrayList<>(initialData);
+        else{
+            this.normalData = Statistics.normalization(this.initialData);
+        }
         this.expectation = Statistics.calculateExpectation(this.normalData);
         this.variance = Statistics.calculateVariance(this.normalData);
         this.EDF = new EDF(this.normalData);
