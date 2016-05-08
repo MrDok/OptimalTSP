@@ -3,7 +3,7 @@ package algorithms.littles;
 /**
  * Created by Alexander on 24.04.2016.
  */
-public class Edge{
+public class Edge implements Cloneable{
     private int begin;
     private int end;
 
@@ -61,5 +61,10 @@ public class Edge{
         int result = begin;
         result = 31 * result + end;
         return result;
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return new Edge(this);
     }
 }

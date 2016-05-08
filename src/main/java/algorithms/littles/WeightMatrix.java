@@ -11,7 +11,7 @@ import java.util.Collections;
  * Created by Alexander on 25.04.2016.
  */
 
-public class WeightMatrix{
+public class WeightMatrix implements Cloneable{
     private ArrayList<ArrayList<Element>> matrix;
     private ArrayList<ArrayList<Element>> reserveMatrix;
 
@@ -136,6 +136,11 @@ public class WeightMatrix{
             matrix.get(row).get(column).setValue(Float.POSITIVE_INFINITY);
     }
 
+    public void setInfinity(Element element){
+        Edge real = this.getRealPosition(element);
+        matrix.get(real.getBegin()).get(real.getEnd()).setValue(Float.POSITIVE_INFINITY);
+    }
+
     public void deleteRowAndColumn(Edge coord){
         matrix.remove(coord.getBegin());
 
@@ -145,10 +150,11 @@ public class WeightMatrix{
     }
 
     public void deleteRowAndColumn(Element element){
-        matrix.remove(element.getCoordinates().getBegin());
+        Edge real = this.getRealPosition(element);
+        matrix.remove(real.getBegin());
 
         for (int i = 0; i < matrix.size(); i++){
-            matrix.get(i).remove(element.getCoordinates().getEnd());
+            matrix.get(i).remove(real.getEnd());
         }
 
         setNeedInfinity();
@@ -246,14 +252,54 @@ public class WeightMatrix{
 
         return sum;
     }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        WeightMatrix clone = new WeightMatrix();
+
+        for(ArrayList<Element> arrayList: matrix){
+            ArrayList<Element> cloneArrayList = new ArrayList<>();
+
+            for(Element element: arrayList){
+                cloneArrayList.add((Element) element.clone());
+            }
+
+            clone.matrix.add(cloneArrayList);
+        }
+
+        for(ArrayList<Element> arrayList: reserveMatrix){
+            ArrayList<Element> cloneArrayList = new ArrayList<>();
+
+            for(Element element: arrayList){
+                cloneArrayList.add((Element) element.clone());
+            }
+
+            clone.reserveMatrix.add(cloneArrayList);
+        }
+
+        return clone;
+    }
+
     public static void main(String args[]){
         WeightMatrix wm = new WeightMatrix();
 
         try{
-            wm.fillMatrix(new File("C:\\Users\\Alexander\\IdeaProjects\\OptimalTSP\\src\\main\\java\\algorithms\\littles\\resources\\test.txt"));
+            wm.fillMatrix(new File("src\\main\\java\\algorithms\\littles\\resources\\test.txt"));
         }catch (IOException e){
             e.printStackTrace();
         }
 
+        WeightMatrix wm2 = null;
+        try {
+             wm2 = (WeightMatrix) wm.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+
+        wm2.transpose();
+
+        wm.output();
+        System.out.println();
+        wm2.output();
     }
 }

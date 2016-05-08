@@ -4,7 +4,7 @@ package algorithms.littles;
  * Created by Alexander on 25.04.2016.
  */
 
-public class Element implements Comparable<Element>{
+public class Element implements Comparable<Element>, Cloneable{
 
     private Float value;
 
@@ -75,5 +75,11 @@ public class Element implements Comparable<Element>{
 
         Element object = (Element) o;
         return ((this.value.equals(object.getValue()) && this.coordinates.equals(object.getCoordinates())));
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        Element clone = new Element(this);
+        return clone;
     }
 }
