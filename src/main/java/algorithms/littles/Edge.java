@@ -3,6 +3,11 @@ package algorithms.littles;
 /**
  * Created by Alexander on 24.04.2016.
  */
+
+/**
+ * Edge is analog of tour between two cities
+ * where begin it is a first city and end is a a second city.
+ */
 public class Edge implements Cloneable{
     private int begin;
     private int end;
@@ -32,11 +37,6 @@ public class Edge implements Cloneable{
     public void setEnd(int end){
         this.end = end;
     }
-
-    /*@Override
-    public String toString(){
-        return "from " + this.begin + " to " + this.end;
-    }*/
 
     @Override
     public String toString(){

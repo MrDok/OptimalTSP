@@ -95,7 +95,6 @@ public class Statistics{
         return tempCDF;
     }
 
-
     public static ArrayList<Float> getUniformData(File file) throws IOException {
         ArrayList<Float> tempList = new ArrayList<>();
 
@@ -143,7 +142,6 @@ public class Statistics{
         return distrArray;
     }
 
-
     public static Float[] doubleFloatConvert(Double[] input){
         Float[] output = new Float[input.length];
         for(int i = 0; i < output.length; i++) {
@@ -151,8 +149,5 @@ public class Statistics{
         }
 
         return output;
-    }
-    public static void main(String args[]){
-        System.out.println(Math.pow(0.3, 1/3D));
     }
 }

@@ -180,8 +180,6 @@ public class KSFitGoodness{
         return (float) (Math.sqrt(test.getNormalData().size()) * d + 1/(6*Math.sqrt(test.getNormalData().size())));
     }
 
-
-
     public class Pair implements Comparable<Pair>{
         private float quantile;
         private int distribution;

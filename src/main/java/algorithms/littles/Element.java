@@ -4,6 +4,9 @@ package algorithms.littles;
  * Created by Alexander on 25.04.2016.
  */
 
+/**
+ * Element contains value, real coordinates and mark which uses in estimation of the matrix
+ */
 public class Element implements Comparable<Element>, Cloneable{
 
     private Float value;

@@ -8,11 +8,23 @@ import java.util.ArrayList;
  * Created by Alexander on 27.04.2016.
  */
 public class Solver{
-    WeightMatrix matrix;
-    float resultLowBound;
-    ArrayList<Element> result;
+    private WeightMatrix matrix;
+    private float resultLowBound;
+    private ArrayList<Element> result;
 
-    Solver(File file) throws IOException{
+    public Solver(WeightMatrix matrix) {
+        this.matrix = matrix;
+        result = new ArrayList<>();
+        resultLowBound = 0f;
+        ArrayList<Element> list = new ArrayList<>();
+
+        float lowBound = 0f;
+        lowBound += matrix.convert();
+
+        solve(matrix, lowBound, list);
+    }
+
+    public Solver(File file) throws IOException{
         matrix = new WeightMatrix();
         result = new ArrayList<>();
         matrix.fillMatrix(file);
@@ -47,7 +59,7 @@ public class Solver{
             boolean check = false;
             if(lowBound1 <= lowBound2){
                 ArrayList<Element> cloneList = (ArrayList<Element>)list.clone();
-                cloneList.add(maxEstimate);
+                cloneList.add(new Element(maxEstimate));
                 check = solve(wm1, lowBound + lowBound1, cloneList);
             }
             if(!check){
@@ -79,13 +91,33 @@ public class Solver{
         }
     }
 
-    public void solveForTwoRangMatrix(WeightMatrix wm, float lowBound, ArrayList<Element> list){
-        lowBound += matrix.convert();
-        result.addAll(matrix.solveForTwoRangMatrix());
-    }
-
     public float weightOfOptimalDecision(ArrayList<Element> list){
         return matrix.calculateWeightOfTour(list);
+    }
+
+
+    public WeightMatrix getMatrix() {
+        return matrix;
+    }
+
+    private void setMatrix(WeightMatrix matrix) {
+        this.matrix = matrix;
+    }
+
+    public float getResultLowBound() {
+        return resultLowBound;
+    }
+
+    private void setResultLowBound(float resultLowBound) {
+        this.resultLowBound = resultLowBound;
+    }
+
+    public ArrayList<Element> getResult() {
+        return result;
+    }
+
+    private void setResult(ArrayList<Element> result) {
+        this.result = result;
     }
 
     public static void main(String args[]){

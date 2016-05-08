@@ -8,8 +8,12 @@ import java.util.TreeMap;
 /**
  * Created by Alexander on 19.04.2016.
  */
+
+/**
+ * Empirical distribution function
+ */
 public class EDF{
-    TreeMap<Float, Float> EDF;
+    private TreeMap<Float, Float> EDF;
 
     public EDF(ArrayList<Float> input){
         EDF = Statistics.calculateEDF(input);
