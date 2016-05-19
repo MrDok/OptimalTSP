@@ -127,6 +127,26 @@ public class Statistics{
         return distrArray;
     }
 
+    public static ArrayList<Float> generateNumbersFromUniform(distributions.interfaces.Distribution distribution, ArrayList<Float> data){
+        ArrayList<Float> distrArray = new ArrayList<>(data.size());
+
+        for(int i = 0; i < data.size(); i++){
+            distrArray.add(round((float) distribution.inverseCumulativeProbability(data.get(i)), Statistics.SCALE));
+        }
+
+        return distrArray;
+    }
+
+    public static ArrayList<Float> generateNumbersFromUniform(AbstractRealDistribution distribution, ArrayList<Float> data){
+        ArrayList<Float> distrArray = new ArrayList<>(data.size());
+
+        for(int i = 0; i < data.size(); i++){
+            distrArray.add(round((float) distribution.inverseCumulativeProbability(data.get(i)), Statistics.SCALE));
+        }
+
+        return distrArray;
+    }
+
     public static ArrayList<Float> generateNumbers(AbstractRealDistribution distribution, int count){
         ArrayList<Float> distrArray = null;
         try {

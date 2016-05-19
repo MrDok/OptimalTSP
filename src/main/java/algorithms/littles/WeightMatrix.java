@@ -1,10 +1,13 @@
 package algorithms.littles;
 
+import algorithms.littles.exceptions.NoNumberDataException;
+import algorithms.littles.exceptions.NoSolutionException;
 import com.sun.org.apache.xerces.internal.dom.ElementNSImpl;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 
 /**
@@ -26,7 +29,7 @@ public class WeightMatrix implements Cloneable{
 
     /**
      *
-     * @param file file which contains square matrix of weights
+     * @param file file which contains square matrix of weights, split by ' '
      * @throws IOException
      */
     public void fillMatrix(File file) throws IOException{
@@ -57,6 +60,85 @@ public class WeightMatrix implements Cloneable{
         }
     }
 
+    /**
+     * fill matrix with data, split by ','
+     * @param file input file
+     * @throws IOException
+     * @throws Exception
+     */
+    public void fillMatrixWithRandomData(File file) throws NoNumberDataException, IOException{
+        ArrayList<String> data = new ArrayList<>();
+
+        try(BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)))){
+            String line;
+            while ((line = br.readLine()) != null){
+                data.addAll(Arrays.asList(line.split(",")));
+            }
+        }
+
+        double matrixSize = Math.sqrt((double) data.size() + 0.25) + 0.5;
+
+        if(matrixSize % 1 <= 0) {
+            for (int i = 0; i < matrixSize; i++) {
+                ArrayList<Element> tempMatrixList = new ArrayList<>((int) matrixSize);
+                ArrayList<Element> tempReserveMatrixList = new ArrayList<>((int) matrixSize);
+                for (int j = 0; j < matrixSize - 1; j++) {
+                    tempMatrixList.add(new Element(Float.valueOf(data.get((int) (i * (matrixSize - 1)) + j)), i, j));
+                    tempReserveMatrixList.add(new Element(Float.valueOf(data.get((int) (i * (matrixSize - 1)) + j)), i, j));
+                }
+                tempMatrixList.add(i, new Element(Float.POSITIVE_INFINITY, i, i));
+                tempReserveMatrixList.add(i, new Element(Float.POSITIVE_INFINITY, i, i));
+
+                matrix.add(tempMatrixList);
+                reserveMatrix.add(tempReserveMatrixList);
+            }
+        }else{
+            throw new NoNumberDataException();
+        }
+    }
+
+    public void fillMatrixWithRandomData(ArrayList<Float> data) throws NoNumberDataException{
+        double matrixSize = Math.sqrt((double) data.size() + 0.25) + 0.5;
+
+        if(matrixSize % 1 <= 0) {
+            for (int i = 0; i < matrixSize; i++) {
+                ArrayList<Element> tempMatrixList = new ArrayList<>();
+                ArrayList<Element> tempReserveMatrixList = new ArrayList<>();
+                for (int j = 0; j < i; j++) {
+                    tempMatrixList.add(new Element(data.get((int) (i * (matrixSize - 1)) + j), i, j));
+                    tempReserveMatrixList.add(new Element(data.get((int) (i * (matrixSize - 1)) + j), i, j));
+                }
+
+                tempMatrixList.add(i, new Element(Float.POSITIVE_INFINITY, i, i));
+                tempReserveMatrixList.add(i, new Element(Float.POSITIVE_INFINITY, i, i));
+
+                for (int j = i+1; j < matrixSize; j++) {
+                    tempMatrixList.add(new Element(data.get((int) (i * (matrixSize - 1)) + j - 1), i, j));
+                    tempReserveMatrixList.add(new Element(data.get((int) (i * (matrixSize - 1)) + j - 1), i, j));
+                }
+
+                matrix.add(tempMatrixList);
+                reserveMatrix.add(tempReserveMatrixList);
+            }
+        }else{
+            throw new NoNumberDataException();
+        }
+    }
+
+    public ArrayList<Float> asList(){
+        ArrayList<Float> result = new ArrayList<>(matrix.size()*(matrix.size() - 1));
+
+        for(ArrayList<Element> list: matrix){
+            for(Element element: list){
+                if(!element.getValue().equals(Float.POSITIVE_INFINITY)){
+                    result.add(element.getValue());
+                }
+            }
+        }
+
+        return result;
+    }
+
     public void output(){
         for (ArrayList<Element> list: matrix){
             System.out.println(list);
@@ -67,10 +149,13 @@ public class WeightMatrix implements Cloneable{
      * convert matrix
      * @return low bound of optimal decision
      */
-    public float convert(){
+    public float convert() throws NoSolutionException{
         float estimation = 0;
         for(int i = 0; i < matrix.size(); i++){
             float min = Collections.min(matrix.get(i)).getValue();
+
+            if(min == Float.POSITIVE_INFINITY)
+                throw new NoSolutionException();
 
             for(int j = 0; j < matrix.get(i).size(); j++){
                 matrix.get(i).get(j).setValue(matrix.get(i).get(j).getValue() - min);
@@ -82,6 +167,9 @@ public class WeightMatrix implements Cloneable{
 
         for(int i = 0; i < matrix.size(); i++){
             float min = Collections.min(matrix.get(i)).getValue();
+
+            if(min == Float.POSITIVE_INFINITY)
+                throw new NoSolutionException();
 
             if(min > 0){
                 for (int j = 0; j < matrix.get(i).size(); j++){
@@ -125,7 +213,7 @@ public class WeightMatrix implements Cloneable{
 
     /**
      * Finds row which not contains Infinity value
-     * @return row of matrix
+     * @return row of matrix. If return == -1 then matrix doesn't contains row without Infinity
      */
     public int getRowWithoutInfinity(){
         boolean flag;
@@ -159,6 +247,27 @@ public class WeightMatrix implements Cloneable{
 
         if(row != -1 && column != -1)
             matrix.get(row).get(column).setValue(Float.POSITIVE_INFINITY);
+    }
+
+    public void setNeedInfinity(Element element){
+        Edge real = getRealPosition(element);
+        matrix.get(real.getEnd()).get(real.getBegin()).setValue(Float.POSITIVE_INFINITY);
+    }
+
+    public void setMaxElementToInfinity(){
+        Element max = new Element(0f, 0, 0);
+
+        for(int i = 0; i < matrix.size(); i++){
+            for(int j = 0; j < matrix.get(i).size(); j++){
+                if(!matrix.get(i).get(j).getValue().equals(Float.POSITIVE_INFINITY) && !matrix.get(i).get(j).getValue().equals(9999f)
+                        && matrix.get(i).get(j).getValue() > max.getValue()){
+                    max = matrix.get(i).get(j);
+                }
+            }
+        }
+
+        this.matrix.get(max.getCoordinates().getBegin()).get(max.getCoordinates().getEnd()).setValue(9999f);
+        //this.setInfinity(max);
     }
 
     /**
@@ -250,6 +359,7 @@ public class WeightMatrix implements Cloneable{
                 min = matrix.get(i).get(real.getEnd()).getValue();
             }
         }
+
         return  min;
     }
 
@@ -259,7 +369,12 @@ public class WeightMatrix implements Cloneable{
      * @return sum of minimum elements of row and column
      */
     public float calculateMark(Element element){
-        return getMinInColumn(element) + getMinInRow(element);
+        float minInRow = getMinInRow(element);
+        float minInColumn = getMinInColumn(element);
+/*        minInRow = (minInRow == Float.POSITIVE_INFINITY) ? 0f : minInRow;
+        minInColumn = (minInColumn == Float.POSITIVE_INFINITY) ? 0f : minInColumn;*/
+
+        return minInRow + minInColumn;
     }
 
     /**

@@ -1,5 +1,8 @@
 package algorithms.littles;
 
+import algorithms.littles.exceptions.NoSolutionException;
+import distribution_estimate.Statistics;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,19 +15,23 @@ public class Solver{
     private float resultLowBound;
     private ArrayList<Element> result;
 
-    public Solver(WeightMatrix matrix) {
-        this.matrix = matrix;
+    public Solver(WeightMatrix matrix) throws NoSolutionException{
+        try {
+            this.matrix = (WeightMatrix) matrix.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
         result = new ArrayList<>();
         resultLowBound = 0f;
         ArrayList<Element> list = new ArrayList<>();
 
         float lowBound = 0f;
-        lowBound += matrix.convert();
+        lowBound += this.matrix.convert();
 
-        solve(matrix, lowBound, list);
+        solve(this.matrix, lowBound, list);
     }
 
-    public Solver(File file) throws IOException{
+    public Solver(File file) throws IOException, NoSolutionException{
         matrix = new WeightMatrix();
         result = new ArrayList<>();
         matrix.fillMatrix(file);
@@ -32,12 +39,13 @@ public class Solver{
         ArrayList<Element> list = new ArrayList<>();
 
         float lowBound = 0f;
+
         lowBound += matrix.convert();
 
         solve(matrix, lowBound, list);
     }
 
-    public boolean solve(WeightMatrix wm, float lowBound, ArrayList<Element> list){
+    public boolean solve(WeightMatrix wm, float lowBound, ArrayList<Element> list) throws NoSolutionException{
         if(wm.rang() != 2){
             WeightMatrix wm1 = null;
             WeightMatrix wm2 = null;
@@ -53,6 +61,9 @@ public class Solver{
             wm1.deleteRowAndColumn(maxEstimate);
             wm2.setInfinity(maxEstimate);
 
+            /*float lowBound1 = Statistics.round(wm1.convert(), Statistics.SCALE);
+            float lowBound2 = Statistics.round(wm2.convert(), Statistics.SCALE);*/
+
             float lowBound1 = wm1.convert();
             float lowBound2 = wm2.convert();
 
@@ -63,7 +74,7 @@ public class Solver{
                 check = solve(wm1, lowBound + lowBound1, cloneList);
             }
             if(!check){
-                solve(wm2, lowBound + lowBound2, list);
+                check = solve(wm2, lowBound + lowBound2, list);
             }
 
             return check;
@@ -78,9 +89,10 @@ public class Solver{
             }
 
             lowBound += wmClone.convert();
+            lowBound = Statistics.round(lowBound, Statistics.SCALE);
             listClone.addAll(wmClone.solveForTwoRangMatrix());
 
-            if(weightOfOptimalDecision(list) <= lowBound) {
+            if(Statistics.round(weightOfOptimalDecision(listClone), Statistics.SCALE) <= lowBound) {
                 this.resultLowBound = lowBound;
                 this.result.addAll(listClone);
                 return true;
@@ -91,10 +103,13 @@ public class Solver{
         }
     }
 
-    public float weightOfOptimalDecision(ArrayList<Element> list){
+    private float weightOfOptimalDecision(ArrayList<Element> list){
         return matrix.calculateWeightOfTour(list);
     }
 
+    public float weightOfOptimalTour(){
+        return matrix.calculateWeightOfTour(result);
+    }
 
     public WeightMatrix getMatrix() {
         return matrix;
@@ -122,11 +137,13 @@ public class Solver{
 
     public static void main(String args[]){
         try{
-            Solver solver = new Solver(new File("src\\main\\java\\algorithms\\littles\\resources\\test.txt"));
+            Solver solver = new Solver(new File("src\\main\\java\\algorithms\\littles\\resources\\test2.txt"));
             System.out.println(solver.result);
             System.out.println(solver.resultLowBound);
         }catch (IOException e){
             e.printStackTrace();
+        }catch (NoSolutionException e){
+            System.out.println("some error");
         }
     }
 
